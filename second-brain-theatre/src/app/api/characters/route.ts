@@ -10,16 +10,16 @@ export async function POST(request: NextRequest) {
   try {
     const { brainDump, characters } = await request.json();
 
+    const eligible: { type: string; casting_note: string }[] = characters.filter(
+      (c: { type: string }) => CHARACTER_PROMPTS[c.type]
+    );
+
     const results = await Promise.allSettled(
-      characters
-        .filter((c: { type: string }) => CHARACTER_PROMPTS[c.type])
-        .map((c: { type: string; casting_note: string }) =>
-          runCharacter(brainDump, c.casting_note, CHARACTER_PROMPTS[c.type])
-        )
+      eligible.map((c) => runCharacter(brainDump, c.casting_note, CHARACTER_PROMPTS[c.type]))
     );
 
     const responses = results.map((result, i) => {
-      const charType = characters[i]?.type;
+      const charType = eligible[i].type;
       if (result.status === "fulfilled") {
         return result.value;
       }

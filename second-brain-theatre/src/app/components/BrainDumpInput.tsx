@@ -1,8 +1,121 @@
 'use client'
 
-import { useRef, useCallback, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useRef, useCallback, useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import { useRecorder } from '@/app/hooks/useRecorder'
+
+// walk-in → stop+stare → walk-out
+type WalkPhase = 'walk-in' | 'stare' | 'walk-out'
+
+function DirectorWalkLoading() {
+  const [phase, setPhase] = useState<WalkPhase>('walk-in')
+
+  useEffect(() => {
+    // walk-in takes ~2.6s to reach centre, then stare for 2.5s, then walk-out
+    const toStare = setTimeout(() => setPhase('stare'), 2600)
+    const toWalkOut = setTimeout(() => setPhase('walk-out'), 2600 + 2500)
+    return () => { clearTimeout(toStare); clearTimeout(toWalkOut) }
+  }, [])
+
+  const sprite =
+    phase === 'stare'
+      ? '/characters/director/Director_breathing-idle_south.gif'
+      : '/characters/director/Director_walking-8-frames_east.gif'
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden relative"
+    >
+      {/* walking track */}
+      <div className="relative w-full flex items-end justify-center" style={{ height: 220 }}>
+        <AnimatePresence mode="wait">
+          {phase === 'walk-in' && (
+            <motion.div
+              key="walk-in"
+              initial={{ x: '-60vw', scaleX: 1 }}
+              animate={{ x: 0 }}
+              transition={{ duration: 2.6, ease: 'linear' }}
+              style={{ position: 'absolute', bottom: 0 }}
+            >
+              <Image
+                src={sprite}
+                alt="Director walking"
+                width={120}
+                height={120}
+                unoptimized
+                style={{ imageRendering: 'pixelated' }}
+              />
+            </motion.div>
+          )}
+
+          {phase === 'stare' && (
+            <motion.div
+              key="stare"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              style={{ position: 'absolute', bottom: 0 }}
+            >
+              {/* glowing ring when staring */}
+              <motion.div
+                animate={{ boxShadow: ['0 0 0px #e879f944', '0 0 40px #e879f9aa', '0 0 0px #e879f944'] }}
+                transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
+                className="rounded-2xl p-1"
+              >
+                <Image
+                  src={sprite}
+                  alt="Director staring"
+                  width={140}
+                  height={140}
+                  unoptimized
+                  style={{ imageRendering: 'pixelated' }}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+
+          {phase === 'walk-out' && (
+            <motion.div
+              key="walk-out"
+              initial={{ x: 0, scaleX: 1 }}
+              animate={{ x: '70vw' }}
+              transition={{ duration: 2.6, ease: 'linear' }}
+              style={{ position: 'absolute', bottom: 0 }}
+            >
+              <Image
+                src={sprite}
+                alt="Director walking out"
+                width={120}
+                height={120}
+                unoptimized
+                style={{ imageRendering: 'pixelated' }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* caption */}
+      <motion.div
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        className="mt-8 text-center space-y-2"
+      >
+        <p className="text-2xl" style={{ fontFamily: 'var(--font-playfair)', color: 'var(--primary)' }}>
+          {phase === 'stare' ? '…taking a look at you…' : 'Casting your inner voices...'}
+        </p>
+        <p className="text-sm" style={{ color: 'var(--text-dim)' }}>
+          listening to the noise
+        </p>
+      </motion.div>
+    </motion.div>
+  )
+}
 
 export default function BrainDumpInput({
   onSubmit,
@@ -39,27 +152,7 @@ export default function BrainDumpInput({
   }
 
   if (loading) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="min-h-screen flex flex-col items-center justify-center px-4"
-      >
-        <motion.div
-          animate={{ scale: [1, 1.06, 1], opacity: [0.7, 1, 0.7] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="text-center space-y-3"
-        >
-          <p className="text-2xl" style={{ fontFamily: 'var(--font-playfair)', color: 'var(--primary)' }}>
-            Casting your inner voices...
-          </p>
-          <p className="text-sm" style={{ color: 'var(--text-dim)' }}>
-            listening to the noise
-          </p>
-        </motion.div>
-      </motion.div>
-    )
+    return <DirectorWalkLoading />
   }
 
   return (
