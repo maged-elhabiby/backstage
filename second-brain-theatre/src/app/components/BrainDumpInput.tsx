@@ -41,14 +41,23 @@ function DirectorWalkLoading() {
               transition={{ duration: 2.6, ease: 'linear' }}
               style={{ position: 'absolute', bottom: 0 }}
             >
-              <Image
-                src={sprite}
-                alt="Director walking"
-                width={120}
-                height={120}
-                unoptimized
-                style={{ imageRendering: 'pixelated' }}
-              />
+              <div
+                className="rounded-2xl p-1"
+                style={{
+                  background: 'linear-gradient(135deg, #e879f9, #e879f944)',
+                  boxShadow: '0 0 10px #e879f933',
+                }}
+              >
+                <Image
+                  src={sprite}
+                  alt="Director walking"
+                  width={120}
+                  height={120}
+                  unoptimized
+                  className="rounded-xl block"
+                  style={{ imageRendering: 'pixelated' }}
+                />
+              </div>
             </motion.div>
           )}
 
@@ -61,11 +70,11 @@ function DirectorWalkLoading() {
               transition={{ duration: 0.2 }}
               style={{ position: 'absolute', bottom: 0 }}
             >
-              {/* glowing ring when staring */}
               <motion.div
-                animate={{ boxShadow: ['0 0 0px #e879f944', '0 0 40px #e879f9aa', '0 0 0px #e879f944'] }}
+                animate={{ boxShadow: ['0 0 10px #e879f933', '0 0 20px #e879f988, 0 0 40px #e879f944', '0 0 10px #e879f933'] }}
                 transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
                 className="rounded-2xl p-1"
+                style={{ background: 'linear-gradient(135deg, #e879f9, #e879f944)' }}
               >
                 <Image
                   src={sprite}
@@ -73,6 +82,7 @@ function DirectorWalkLoading() {
                   width={140}
                   height={140}
                   unoptimized
+                  className="rounded-xl block"
                   style={{ imageRendering: 'pixelated' }}
                 />
               </motion.div>
@@ -87,14 +97,23 @@ function DirectorWalkLoading() {
               transition={{ duration: 2.6, ease: 'linear' }}
               style={{ position: 'absolute', bottom: 0 }}
             >
-              <Image
-                src={sprite}
-                alt="Director walking out"
-                width={120}
-                height={120}
-                unoptimized
-                style={{ imageRendering: 'pixelated' }}
-              />
+              <div
+                className="rounded-2xl p-1"
+                style={{
+                  background: 'linear-gradient(135deg, #e879f9, #e879f944)',
+                  boxShadow: '0 0 10px #e879f933',
+                }}
+              >
+                <Image
+                  src={sprite}
+                  alt="Director walking out"
+                  width={120}
+                  height={120}
+                  unoptimized
+                  className="rounded-xl block"
+                  style={{ imageRendering: 'pixelated' }}
+                />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
