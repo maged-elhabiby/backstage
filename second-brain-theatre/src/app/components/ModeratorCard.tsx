@@ -6,12 +6,41 @@ import { CHARACTER_IMAGES, SCENE_LABEL_EMOJIS } from '@/lib/types'
 import type { CharacterResponse, ModeratorResponse } from '@/lib/types'
 import Image from 'next/image'
 
+const CHAR_COLORS: Record<string, string> = {
+  firefighter:   'var(--char-firefighter)',
+  alien:         'var(--char-alien)',
+  astronaut:     'var(--char-astronaut)',
+  chef:          'var(--char-chef)',
+  director:      'var(--char-director)',
+  doctor:        'var(--char-doctor)',
+  hazmat:        'var(--char-hazmat)',
+  judge:         'var(--char-judge)',
+  nerd:          'var(--char-nerd)',
+  referee:       'var(--char-referee)',
+  soccer_player: 'var(--char-soccer_player)',
+  spy:           'var(--char-spy)',
+  superhero:     'var(--char-superhero)',
+  therapist:     'var(--char-therapist)',
+  wizard:        'var(--char-wizard)',
+}
+
 function typeFromName(name: string): string {
   const map: Record<string, string> = {
-    'The Firefighter': 'firefighter', 'The Perfectionist': 'perfectionist',
-    'The Avoider': 'avoider', 'The Engineer': 'engineer', 'Future You': 'future_you',
-    'The Body': 'body', 'The People-Pleaser': 'people_pleaser',
-    'The Critic': 'critic', 'The Dreamer': 'dreamer',
+    'The Firefighter':   'firefighter',
+    'The Alien':         'alien',
+    'The Astronaut':     'astronaut',
+    'The Chef':          'chef',
+    'The Director':      'director',
+    'The Doctor':        'doctor',
+    'The Hazmat':        'hazmat',
+    'The Judge':         'judge',
+    'The Nerd':          'nerd',
+    'The Referee':       'referee',
+    'The Soccer Player': 'soccer_player',
+    'The Spy':           'spy',
+    'The Superhero':     'superhero',
+    'The Therapist':     'therapist',
+    'The Wizard':        'wizard',
   }
   return map[name] ?? name.toLowerCase().replace(/^the /, '').replace(/ /g, '_')
 }
@@ -98,17 +127,26 @@ export default function ModeratorCard({
     >
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Image
-          src="/characters/moderator/moderator.gif"
-          alt="Moderator"
-          width={80}
-          height={80}
-          unoptimized
-          style={{ imageRendering: 'pixelated' }}
-        />
+        <div
+          className="rounded-2xl p-1 flex-shrink-0"
+          style={{
+            background: 'linear-gradient(135deg, var(--accent-warm), rgba(251,191,36,0.3))',
+            boxShadow: '0 0 16px rgba(251,191,36,0.3)',
+          }}
+        >
+          <Image
+            src="/characters/director/Director_breathing-idle_south.gif"
+            alt="The Director"
+            width={76}
+            height={76}
+            unoptimized
+            className="rounded-xl block"
+            style={{ imageRendering: 'pixelated' }}
+          />
+        </div>
         <div>
           <p className="text-xl font-bold" style={{ fontFamily: 'var(--font-playfair)', color: 'var(--accent-warm)' }}>
-            The Moderator
+            The Director
           </p>
           <span className="text-xs px-3 py-1 rounded-full" style={{ background: 'rgba(251,191,36,0.12)', color: 'var(--accent-warm)' }}>
             {emoji} {sceneLabel}
@@ -203,18 +241,22 @@ export default function ModeratorCard({
         {characters.map((c, i) => {
           const t = typeFromName(c.name)
           const img = CHARACTER_IMAGES[t]
+          const charColor = CHAR_COLORS[t] ?? 'var(--border)'
           return (
             <button
               key={i}
               onClick={() => onCharacterTap({ type: t, name: c.name, line: c.line })}
-              className="rounded-full p-1.5 transition-all hover:scale-110 cursor-pointer"
-              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+              className="rounded-xl p-0.5 transition-all hover:scale-110 cursor-pointer"
+              style={{
+                background: `linear-gradient(135deg, ${charColor}, ${charColor}55)`,
+                boxShadow: `0 0 8px ${charColor}44`,
+              }}
               title={`Talk to ${c.name}`}
             >
               {img ? (
-                <Image src={img} alt={c.name} width={44} height={44} unoptimized style={{ imageRendering: 'pixelated' }} />
+                <Image src={img} alt={c.name} width={44} height={44} unoptimized className="rounded-lg block" style={{ imageRendering: 'pixelated' }} />
               ) : (
-                <span className="text-xl w-11 h-11 flex items-center justify-center">{c.emoji}</span>
+                <span className="text-xl w-11 h-11 flex items-center justify-center rounded-lg" style={{ background: 'var(--surface)' }}>{c.emoji}</span>
               )}
             </button>
           )

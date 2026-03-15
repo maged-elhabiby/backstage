@@ -89,31 +89,31 @@ function reducer(state: State, action: Action): State {
 
 const MOCK_CASTING: CastingResult = {
   characters: [
-    { type: 'firefighter', casting_note: 'Client email urgency' },
-    { type: 'body', casting_note: 'Skipped meals, exhaustion' },
-    { type: 'people_pleaser', casting_note: 'Multiple people waiting' },
-    { type: 'engineer', casting_note: 'Recurring pattern detected' },
-    { type: 'dreamer', casting_note: 'Side project escape' },
+    { type: 'firefighter',   casting_note: 'Client email urgency' },
+    { type: 'doctor',        casting_note: 'Skipped meals, ignoring warning signs' },
+    { type: 'superhero',     casting_note: 'Multiple people counting on you' },
+    { type: 'wizard',        casting_note: 'Recurring pattern — there may be a smarter path' },
+    { type: 'astronaut',     casting_note: 'Losing perspective on what actually matters' },
   ],
   freeze_frame: "You're caught between urgency, exhaustion, and fear of disappointing three different people at once.",
   scene_label: 'Urgency Spiral',
 }
 
 const MOCK_CHARACTERS: CharacterResponse[] = [
-  { name: 'The Firefighter', emoji: '🚒', line: "The client email has to go out NOW — they've been waiting since yesterday.", protecting: 'professional trust', intensity: 9 },
-  { name: 'The Body', emoji: '🧍', line: "You haven't eaten in 8 hours. This isn't a thinking problem anymore.", protecting: 'basic functioning', intensity: 8 },
-  { name: 'The People-Pleaser', emoji: '🤝', line: "Your partner is expecting you home by 6. Your manager is expecting the report. Someone is going to be let down.", protecting: 'relationships', intensity: 7 },
-  { name: 'The Engineer', emoji: '🛠', line: "This is the third time this month you've been in this exact spiral. The problem isn't the tasks — it's that nothing has a buffer.", protecting: 'systemic fix', intensity: 6 },
-  { name: 'The Dreamer', emoji: '🌅', line: "What if you just... didn't? What if the side project is the actual answer?", protecting: 'life alignment', intensity: 4 },
+  { name: 'The Firefighter',  emoji: '🚒', line: "The client email has to go out NOW — they've been waiting since yesterday.", protecting: 'professional trust', intensity: 9 },
+  { name: 'The Doctor',       emoji: '🩺', line: "You haven't eaten in 8 hours. These are symptoms of a system under serious strain.", protecting: 'proper diagnosis', intensity: 8 },
+  { name: 'The Superhero',    emoji: '🦸', line: "Your partner is expecting you home by 6. Your manager needs the report. Someone will be let down and it cannot be us.", protecting: 'being needed', intensity: 7 },
+  { name: 'The Wizard',       emoji: '🧙', line: "This is the third time this month. The brute-force approach isn't working. There's a spell for this pattern.", protecting: 'creative solutions', intensity: 6 },
+  { name: 'The Astronaut',    emoji: '🧑‍🚀', line: "Houston... from up here, the client email is one pixel. The exhaustion is the whole continent.", protecting: 'perspective', intensity: 4 },
 ]
 
 const MOCK_MODERATOR: ModeratorResponse = {
   best_move: "Open Gmail. Reply to the client: 'Got it — reviewing the deck now, will send final version by tomorrow 10am.' Send. Close Gmail. (3 minutes)",
   can_wait: "The Q3 report. Your manager has survived this long — 14 more hours won't change anything.",
-  why_this_works: "This satisfies the Firefighter's need for responsiveness and the People-Pleaser's fear of silence, without forcing deep work on the Body's empty tank.",
+  why_this_works: "This satisfies the Firefighter's need for responsiveness and the Superhero's fear of silence, without forcing deep work on the Doctor's empty tank.",
   do_not_do: "Do not open Slack for the next 25 minutes. The 47 unread messages will still be there.",
   overreacting_voice: "The Firefighter — treating everything as equally urgent when only the client reply actually needs to happen today.",
-  scene_insight: "The Dreamer only showed up at intensity 4, but the fact that it showed up at all means this isn't just about today's tasks.",
+  scene_insight: "The Astronaut only showed up at intensity 4, but the fact that it showed up at all means part of you knows this isn't actually as catastrophic as it feels.",
   action_type: 'draft',
   action_draft: "Hi — thanks for your patience. I'm reviewing the deck now and will have the final version to you by tomorrow at 10am.",
 }

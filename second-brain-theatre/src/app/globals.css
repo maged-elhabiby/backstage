@@ -15,15 +15,21 @@
   --success: #86efac;
   --danger: #fca5a5;
 
-  --char-firefighter: #f87171;
-  --char-perfectionist: #a78bfa;
-  --char-avoider: #67e8f9;
-  --char-engineer: #fbbf24;
-  --char-future-you: #c084fc;
-  --char-body: #86efac;
-  --char-people-pleaser: #f9a8d4;
-  --char-critic: #fca5a5;
-  --char-dreamer: #7dd3fc;
+  --char-firefighter:   #f87171;
+  --char-alien:         #a3e635;
+  --char-astronaut:     #7dd3fc;
+  --char-chef:          #fb923c;
+  --char-director:      #e879f9;
+  --char-doctor:        #34d399;
+  --char-hazmat:        #facc15;
+  --char-judge:         #a78bfa;
+  --char-nerd:          #60a5fa;
+  --char-referee:       #f9a8d4;
+  --char-soccer_player: #4ade80;
+  --char-spy:           #94a3b8;
+  --char-superhero:     #fbbf24;
+  --char-therapist:     #c084fc;
+  --char-wizard:        #67e8f9;
 }
 
 body {

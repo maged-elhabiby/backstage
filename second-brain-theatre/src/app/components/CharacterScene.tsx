@@ -7,28 +7,40 @@ import type { CharacterResponse } from '@/lib/types'
 import Image from 'next/image'
 
 const CHAR_COLORS: Record<string, string> = {
-  firefighter: 'var(--char-firefighter)',
-  perfectionist: 'var(--char-perfectionist)',
-  avoider: 'var(--char-avoider)',
-  engineer: 'var(--char-engineer)',
-  future_you: 'var(--char-future-you)',
-  body: 'var(--char-body)',
-  people_pleaser: 'var(--char-people-pleaser)',
-  critic: 'var(--char-critic)',
-  dreamer: 'var(--char-dreamer)',
+  firefighter:   'var(--char-firefighter)',
+  alien:         'var(--char-alien)',
+  astronaut:     'var(--char-astronaut)',
+  chef:          'var(--char-chef)',
+  director:      'var(--char-director)',
+  doctor:        'var(--char-doctor)',
+  hazmat:        'var(--char-hazmat)',
+  judge:         'var(--char-judge)',
+  nerd:          'var(--char-nerd)',
+  referee:       'var(--char-referee)',
+  soccer_player: 'var(--char-soccer_player)',
+  spy:           'var(--char-spy)',
+  superhero:     'var(--char-superhero)',
+  therapist:     'var(--char-therapist)',
+  wizard:        'var(--char-wizard)',
 }
 
 function typeFromName(name: string): string {
   const map: Record<string, string> = {
-    'The Firefighter': 'firefighter',
-    'The Perfectionist': 'perfectionist',
-    'The Avoider': 'avoider',
-    'The Engineer': 'engineer',
-    'Future You': 'future_you',
-    'The Body': 'body',
-    'The People-Pleaser': 'people_pleaser',
-    'The Critic': 'critic',
-    'The Dreamer': 'dreamer',
+    'The Firefighter':   'firefighter',
+    'The Alien':         'alien',
+    'The Astronaut':     'astronaut',
+    'The Chef':          'chef',
+    'The Director':      'director',
+    'The Doctor':        'doctor',
+    'The Hazmat':        'hazmat',
+    'The Judge':         'judge',
+    'The Nerd':          'nerd',
+    'The Referee':       'referee',
+    'The Soccer Player': 'soccer_player',
+    'The Spy':           'spy',
+    'The Superhero':     'superhero',
+    'The Therapist':     'therapist',
+    'The Wizard':        'wizard',
   }
   return map[name] ?? name.toLowerCase().replace(/^the /, '').replace(/ /g, '_')
 }
@@ -194,19 +206,29 @@ export default function CharacterScene({
                   className="relative"
                 >
                   {imgSrc ? (
-                    <Image
-                      src={imgSrc}
-                      alt={char.name}
-                      width={160}
-                      height={160}
-                      unoptimized
-                      className="transition-all group-hover:brightness-125"
-                      style={{ imageRendering: 'pixelated' }}
-                    />
+                    <div
+                      className="rounded-2xl p-1"
+                      style={{
+                        background: `linear-gradient(135deg, ${color}, ${color}44)`,
+                        boxShadow: isSpeaking
+                          ? `0 0 20px ${color}88, 0 0 40px ${color}44`
+                          : `0 0 10px ${color}33`,
+                      }}
+                    >
+                      <Image
+                        src={imgSrc}
+                        alt={char.name}
+                        width={156}
+                        height={156}
+                        unoptimized
+                        className="rounded-xl transition-all group-hover:brightness-125 block"
+                        style={{ imageRendering: 'pixelated' }}
+                      />
+                    </div>
                   ) : (
                     <span
                       className="text-7xl block w-40 h-40 flex items-center justify-center rounded-full"
-                      style={{ background: `${color}22` }}
+                      style={{ background: `${color}22`, border: `2px solid ${color}` }}
                     >
                       {char.emoji}
                     </span>
