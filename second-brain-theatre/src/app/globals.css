@@ -1,26 +1,42 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --bg: #0c0b14;
+  --surface: #1a1726;
+  --card: #221f2e;
+  --border: rgba(192, 132, 252, 0.18);
+  --primary: #c084fc;
+  --primary-hover: #d8b4fe;
+  --accent-warm: #fbbf24;
+  --accent-blue: #7dd3fc;
+  --text: #f5f0ff;
+  --text-secondary: #b8b0cc;
+  --text-dim: #7c7394;
+  --success: #86efac;
+  --danger: #fca5a5;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --char-firefighter: #f87171;
+  --char-perfectionist: #a78bfa;
+  --char-avoider: #67e8f9;
+  --char-engineer: #fbbf24;
+  --char-future-you: #c084fc;
+  --char-body: #86efac;
+  --char-people-pleaser: #f9a8d4;
+  --char-critic: #fca5a5;
+  --char-dreamer: #7dd3fc;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body), sans-serif;
+}
+
+::selection {
+  background: rgba(192, 132, 252, 0.35);
+}
+
+textarea::placeholder,
+input::placeholder {
+  color: var(--text-dim);
 }

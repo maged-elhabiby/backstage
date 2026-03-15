@@ -5,7 +5,7 @@ import { CASTING_DIRECTOR_PROMPT } from "../prompts/castingDirector";
 import { MODERATOR_PROMPT } from "../prompts/moderator";
 
 const model = new ChatAnthropic({
-  model: "claude-sonnet-4-6-20250514",
+  model: "claude-sonnet-4-20250514",
   temperature: 0.8,
   maxTokens: 1000,
 });
