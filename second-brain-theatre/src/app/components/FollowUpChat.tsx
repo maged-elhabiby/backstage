@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { CHARACTER_IMAGES } from '@/lib/types'
 import type { FollowUpMessage } from '@/lib/types'
+import { useRecorder } from '@/app/hooks/useRecorder'
 import Image from 'next/image'
 
 const CHAR_COLORS: Record<string, string> = {
@@ -33,27 +34,31 @@ const HARDCODED_REPLIES: Record<string, string> = {
 export default function FollowUpChat({
   character,
   sceneId,
+  brainDump,
+  onPlayLine,
   onClose,
 }: {
   character: { type: string; name: string; line: string }
   sceneId: string | null
+  brainDump: string
+  onPlayLine: (characterType: string, line: string) => Promise<void>
   onClose: () => void
 }) {
   const [messages, setMessages] = useState<FollowUpMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const messagesRef = useRef(messages)
+  messagesRef.current = messages
+  const loadingRef = useRef(loading)
+  loadingRef.current = loading
   const img = CHARACTER_IMAGES[character.type]
   const color = CHAR_COLORS[character.type] ?? 'var(--primary)'
 
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
-  }, [messages])
-
-  const send = async () => {
-    if (!input.trim() || loading || messages.length >= 20) return
-    const userMsg: FollowUpMessage = { role: 'user', content: input.trim() }
-    const newMessages = [...messages, userMsg]
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || loadingRef.current || messagesRef.current.length >= 20) return
+    const userMsg: FollowUpMessage = { role: 'user', content: text.trim() }
+    const newMessages = [...messagesRef.current, userMsg]
     setMessages(newMessages)
     setInput('')
     setLoading(true)
@@ -66,6 +71,7 @@ export default function FollowUpChat({
           sceneId,
           characterType: character.type,
           originalLine: character.line,
+          brainDump,
           messages: newMessages,
         }),
       })
@@ -74,14 +80,34 @@ export default function FollowUpChat({
       setTimeout(() => {
         setMessages(prev => [...prev, { role: 'character', content: reply }])
         setLoading(false)
+        onPlayLine(character.type, reply)
       }, 300)
     } catch {
+      const fallback = HARDCODED_REPLIES[character.type] ?? "I've said my piece."
       setTimeout(() => {
-        setMessages(prev => [...prev, { role: 'character', content: HARDCODED_REPLIES[character.type] ?? "I've said my piece." }])
+        setMessages(prev => [...prev, { role: 'character', content: fallback }])
         setLoading(false)
+        onPlayLine(character.type, fallback)
       }, 300)
     }
+  }, [sceneId, character.type, character.line, onPlayLine])
+
+  const { recording, transcribing, startRecording, stopRecording } = useRecorder({ onAutoStop: sendMessage })
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
+  }, [messages])
+
+  const handleMicToggle = async () => {
+    if (recording) {
+      const text = await stopRecording()
+      if (text) sendMessage(text)
+    } else {
+      await startRecording()
+    }
   }
+
+  const send = () => sendMessage(input)
 
   const atLimit = messages.length >= 20
 
@@ -149,6 +175,18 @@ export default function FollowUpChat({
                 }}
               >
                 {m.content}
+                {m.role === 'character' && (
+                  <button
+                    onClick={() => onPlayLine(character.type, m.content)}
+                    className="inline-block ml-2 align-middle opacity-40 hover:opacity-100 transition-opacity cursor-pointer"
+                    title="Play voice"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                    </svg>
+                  </button>
+                )}
               </div>
             </motion.div>
           ))}
@@ -171,15 +209,41 @@ export default function FollowUpChat({
             </p>
           ) : (
             <div className="flex gap-2">
+              <motion.button
+                type="button"
+                onClick={handleMicToggle}
+                disabled={transcribing || loading}
+                whileTap={{ scale: 0.9 }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-all disabled:opacity-40 flex-shrink-0"
+                style={{
+                  background: recording ? 'var(--danger, #ef4444)' : 'var(--surface)',
+                  border: `1px solid ${recording ? 'var(--danger, #ef4444)' : `${color}33`}`,
+                  color: recording ? '#fff' : color,
+                }}
+              >
+                {transcribing ? (
+                  <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity }} className="text-xs">···</motion.span>
+                ) : recording ? (
+                  <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.8, repeat: Infinity }}>
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="3" width="10" height="10" rx="2" /></svg>
+                  </motion.span>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="1" width="6" height="12" rx="3" />
+                    <path d="M5 10a7 7 0 0 0 14 0" />
+                    <line x1="12" y1="17" x2="12" y2="21" />
+                  </svg>
+                )}
+              </motion.button>
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && send()}
-                placeholder={`Say something to ${character.name}...`}
+                placeholder={transcribing ? 'Transcribing...' : `Say something to ${character.name}...`}
                 className="flex-1 rounded-xl px-4 py-2.5 text-sm focus:outline-none"
                 style={{
                   background: 'var(--surface)',
-                  border: `1px solid ${color}33`,
+                  border: `1px solid ${recording ? 'var(--danger, #ef4444)' : `${color}33`}`,
                   color: 'var(--text)',
                 }}
               />

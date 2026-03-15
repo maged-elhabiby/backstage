@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { CHARACTER_IMAGES, SCENE_LABEL_EMOJIS } from '@/lib/types'
 import type { CharacterResponse, ModeratorResponse } from '@/lib/types'
@@ -20,6 +20,7 @@ export default function ModeratorCard({
   moderator,
   sceneLabel,
   characters,
+  onPlayLine,
   onCharacterTap,
   onReset,
   onShowRating,
@@ -28,19 +29,58 @@ export default function ModeratorCard({
   moderator: ModeratorResponse
   sceneLabel: string
   characters: CharacterResponse[]
+  onPlayLine: (characterType: string, line: string) => Promise<void>
   onCharacterTap: (c: { type: string; name: string; line: string }) => void
   onReset: () => void
   onShowRating: () => void
   dimmed: boolean
 }) {
   const [copied, setCopied] = useState(false)
+  const [timerActive, setTimerActive] = useState(false)
+  const [timerSeconds, setTimerSeconds] = useState(0)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const emoji = SCENE_LABEL_EMOJIS[sceneLabel] ?? '🌀'
+  const hasAutoPlayed = useRef(false)
+
+  useEffect(() => {
+    if (!hasAutoPlayed.current) {
+      hasAutoPlayed.current = true
+      const timer = setTimeout(() => onPlayLine('moderator', moderator.best_move), 800)
+      return () => clearTimeout(timer)
+    }
+  }, [onPlayLine, moderator.best_move])
+
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [])
 
   const handleAction = () => {
     if (moderator.action_type === 'draft' || moderator.action_type === 'copy') {
       navigator.clipboard.writeText(moderator.action_draft)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+    } else if (moderator.action_type === 'timer') {
+      if (timerActive) {
+        if (timerRef.current) clearInterval(timerRef.current)
+        timerRef.current = null
+        setTimerActive(false)
+        setTimerSeconds(0)
+      } else {
+        const mins = parseInt(moderator.action_draft) || 25
+        setTimerSeconds(mins * 60)
+        setTimerActive(true)
+        timerRef.current = setInterval(() => {
+          setTimerSeconds(prev => {
+            if (prev <= 1) {
+              if (timerRef.current) clearInterval(timerRef.current)
+              timerRef.current = null
+              setTimerActive(false)
+              return 0
+            }
+            return prev - 1
+          })
+        }, 1000)
+      }
     }
   }
 
@@ -88,9 +128,22 @@ export default function ModeratorCard({
         </div>
 
         <div className="rounded-xl p-4" style={{ background: 'rgba(192,132,252,0.06)', border: '1px solid rgba(192,132,252,0.15)' }}>
-          <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--primary)' }}>
-            Best stabilizing move
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--primary)' }}>
+              Best stabilizing move
+            </p>
+            <button
+              onClick={() => onPlayLine('moderator', moderator.best_move)}
+              className="opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
+              title="Play moderator voice"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-warm)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              </svg>
+            </button>
+          </div>
           <p className="text-base font-medium leading-relaxed" style={{ color: 'var(--text)' }}>
             {moderator.best_move}
           </p>
@@ -130,7 +183,15 @@ export default function ModeratorCard({
           border: moderator.action_type === 'draft' ? 'none' : '2px solid var(--accent-warm)',
         }}
       >
-        {copied ? '✓ Copied' : moderator.action_type === 'timer' ? `Start ${moderator.action_draft}-min focus` : moderator.action_type === 'draft' ? 'Copy draft to clipboard' : 'Copy action'}
+        {copied
+          ? '✓ Copied'
+          : moderator.action_type === 'timer'
+            ? timerActive
+              ? `⏱ ${Math.floor(timerSeconds / 60)}:${(timerSeconds % 60).toString().padStart(2, '0')} — tap to stop`
+              : `Start ${moderator.action_draft}-min focus`
+            : moderator.action_type === 'draft'
+              ? 'Copy draft to clipboard'
+              : 'Copy action'}
       </button>
 
       <p className="text-xs italic text-center" style={{ color: 'var(--text-dim)' }}>
