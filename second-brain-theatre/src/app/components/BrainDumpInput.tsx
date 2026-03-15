@@ -305,7 +305,7 @@ export default function BrainDumpInput({
 
         <button
           onClick={onDemo}
-          className="fixed top-4 right-16 flex items-center gap-1.5 text-xs opacity-30 hover:opacity-80 transition-opacity cursor-pointer"
+          className="fixed top-4 right-28 flex items-center gap-1.5 text-xs opacity-30 hover:opacity-80 transition-opacity cursor-pointer"
           style={{ color: 'var(--accent-warm)' }}
         >
           ▶ Demo

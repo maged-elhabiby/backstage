@@ -381,6 +381,19 @@ export default function Theatre({ userEmail }: { userEmail: string }) {
         🎭 Your Cast
       </button>
 
+      <button
+        onClick={async () => {
+          const { createClient } = await import('@/lib/supabase/client')
+          const supabase = createClient()
+          await supabase.auth.signOut()
+          window.location.href = '/'
+        }}
+        className="fixed top-4 right-4 text-xs opacity-30 hover:opacity-70 transition-opacity cursor-pointer"
+        style={{ color: 'var(--text-dim)' }}
+      >
+        Sign out
+      </button>
+
     </div>
   )
 }
