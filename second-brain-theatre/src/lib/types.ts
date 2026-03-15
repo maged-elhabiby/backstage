@@ -75,15 +75,15 @@ export const SCENE_LABEL_EMOJIS: Record<string, string> = {
 };
 
 export const CHARACTER_IMAGES: Record<string, string> = {
-  firefighter: "/characters/firefighter.png",
-  perfectionist: "/characters/perfectionist.png",
-  avoider: "/characters/avoider.png",
-  engineer: "/characters/engineer.png",
-  future_you: "/characters/future_you.png",
-  body: "/characters/body.png",
-  people_pleaser: "/characters/people_pleaser.png",
-  critic: "/characters/critic.png",
-  dreamer: "/characters/dreamer.png",
+  firefighter: "/characters/firefighter.gif",
+  perfectionist: "/characters/perfectionist.gif",
+  avoider: "/characters/avoider.gif",
+  engineer: "/characters/engineer.gif",
+  future_you: "/characters/future_you.gif",
+  body: "/characters/body.gif",
+  people_pleaser: "/characters/body.gif",
+  critic: "/characters/critic.gif",
+  dreamer: "/characters/dreamer.gif",
 };
 
 export const FALLBACK_LINES: Record<string, CharacterResponse> = {

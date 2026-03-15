@@ -5,7 +5,7 @@ import './globals.css'
 const playfair = Playfair_Display({
   variable: '--font-playfair',
   subsets: ['latin'],
-  weight: ['700'],
+  weight: ['400', '700'],
 })
 
 const dmSans = DM_Sans({
@@ -16,7 +16,7 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: 'Second Brain Theatre',
-  description: 'A conflict-resolution interface for overwhelmed minds',
+  description: 'Work smarter when your brain is overwhelmed',
 }
 
 export default function RootLayout({
@@ -26,10 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${playfair.variable} ${dmSans.variable} antialiased`}
-        style={{ fontFamily: 'var(--font-body)', background: '#0a0a0f', color: '#e5e5e5' }}
-      >
+      <body className={`${playfair.variable} ${dmSans.variable} antialiased`}>
         {children}
       </body>
     </html>
