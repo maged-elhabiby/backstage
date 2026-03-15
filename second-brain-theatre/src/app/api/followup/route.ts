@@ -17,6 +17,10 @@ const followupModel = new ChatAnthropic({
 });
 
 export async function POST(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
     const { sceneId, characterType, originalLine, brainDump, messages } = (await request.json()) as {
       sceneId: string | null;
@@ -46,7 +50,6 @@ export async function POST(request: NextRequest) {
       : response.content.map((c) => ("text" in c ? c.text : "")).join("");
 
     if (sceneId && sceneId !== "mock") {
-      const supabase = await createClient();
       const lastUserMsg = messages[messages.length - 1];
       if (lastUserMsg?.role === "user") {
         saveFollowUpMessage(supabase, sceneId, characterType, "user", lastUserMsg.content).catch(() => {});
