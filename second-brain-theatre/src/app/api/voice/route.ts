@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
-const audioCache = new Map<string, Buffer>();
+const audioCache = new Map<string, ArrayBuffer>();
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -62,10 +62,9 @@ export async function GET(request: NextRequest) {
     }
 
     const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    audioCache.set(cacheKey, buffer);
+    audioCache.set(cacheKey, arrayBuffer);
 
-    return new Response(buffer, {
+    return new Response(arrayBuffer, {
       headers: {
         "Content-Type": "audio/mpeg",
         "Cache-Control": "public, max-age=86400",
