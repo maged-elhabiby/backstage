@@ -274,6 +274,7 @@ export default function Theatre({ userEmail }: { userEmail: string }) {
               playingCharacter={playingCharacter}
               onPlayLine={playLine}
               onPlaySequence={playSequence}
+              onStop={stopVoice}
               onCharacterTap={(c) => {
                 if (state.chatCharacter?.type === c.type) {
                   dispatch({ type: 'CLOSE_CHAT' })

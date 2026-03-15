@@ -10,6 +10,7 @@ export function useVoice() {
   const abortRef = useRef<AbortController | null>(null)
   const queueRef = useRef<QueueItem[]>([])
   const playingRef = useRef(false)
+  const resolveCurrentAudio = useRef<(() => void) | null>(null)
 
   const stop = useCallback(() => {
     queueRef.current = []
@@ -19,6 +20,8 @@ export function useVoice() {
       audioRef.current.pause()
       audioRef.current = null
     }
+    resolveCurrentAudio.current?.()
+    resolveCurrentAudio.current = null
     setPlayingCharacter(null)
   }, [])
 
@@ -39,28 +42,21 @@ export function useVoice() {
       const url = URL.createObjectURL(blob)
 
       return new Promise<void>((resolve) => {
+        resolveCurrentAudio.current = resolve
+
+        const finish = () => {
+          URL.revokeObjectURL(url)
+          audioRef.current = null
+          resolveCurrentAudio.current = null
+          setPlayingCharacter(null)
+          resolve()
+        }
+
         const audio = new Audio(url)
         audioRef.current = audio
-
-        audio.onended = () => {
-          URL.revokeObjectURL(url)
-          audioRef.current = null
-          setPlayingCharacter(null)
-          resolve()
-        }
-
-        audio.onerror = () => {
-          URL.revokeObjectURL(url)
-          audioRef.current = null
-          setPlayingCharacter(null)
-          resolve()
-        }
-
-        audio.play().catch(() => {
-          URL.revokeObjectURL(url)
-          setPlayingCharacter(null)
-          resolve()
-        })
+        audio.onended = finish
+        audio.onerror = finish
+        audio.play().catch(finish)
       })
     } catch {
       setPlayingCharacter(null)
@@ -89,23 +85,20 @@ export function useVoice() {
         const url = URL.createObjectURL(blob)
 
         await new Promise<void>((resolve) => {
+          resolveCurrentAudio.current = resolve
+
+          const finish = () => {
+            URL.revokeObjectURL(url)
+            audioRef.current = null
+            resolveCurrentAudio.current = null
+            resolve()
+          }
+
           const audio = new Audio(url)
           audioRef.current = audio
-
-          audio.onended = () => {
-            URL.revokeObjectURL(url)
-            audioRef.current = null
-            resolve()
-          }
-          audio.onerror = () => {
-            URL.revokeObjectURL(url)
-            audioRef.current = null
-            resolve()
-          }
-          audio.play().catch(() => {
-            URL.revokeObjectURL(url)
-            resolve()
-          })
+          audio.onended = finish
+          audio.onerror = finish
+          audio.play().catch(finish)
         })
       } catch {
         continue

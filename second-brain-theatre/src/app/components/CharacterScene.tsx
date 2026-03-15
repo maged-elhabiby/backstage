@@ -53,6 +53,7 @@ export default function CharacterScene({
   playingCharacter,
   onPlayLine,
   onPlaySequence,
+  onStop,
   onCharacterTap,
 }: {
   characters: CharacterResponse[]
@@ -62,6 +63,7 @@ export default function CharacterScene({
   playingCharacter: string | null
   onPlayLine: (characterType: string, line: string) => Promise<void>
   onPlaySequence: (items: { type: string; line: string }[]) => Promise<void>
+  onStop: () => void
   onCharacterTap: (c: { type: string; name: string; line: string }) => void
 }) {
   const [visibleCount, setVisibleCount] = useState(0)
@@ -74,7 +76,7 @@ export default function CharacterScene({
         type: castingTypes[i] ?? typeFromName(char.name),
         line: char.line,
       }))
-      const timer = setTimeout(() => onPlaySequence(items), characters.length * 800 + 600)
+      const timer = setTimeout(() => onPlaySequence(items), characters.length * 200 + 400)
       return () => clearTimeout(timer)
     }
   }, [characters, castingTypes, onPlaySequence])
@@ -121,11 +123,18 @@ export default function CharacterScene({
                 key={char.name}
                 initial={{ opacity: 0, y: 60, scale: 0.8 }}
                 animate={{
-                  opacity: isDimmed ? 0.4 : 1,
-                  y: 0,
-                  scale: isDimmed ? 0.9 : 1,
+                  opacity: isDimmed ? 0.35 : 1,
+                  y: isDimmed ? 24 : 0,
+                  scale: isDimmed ? 0.82 : 1,
+                  filter: isDimmed ? 'blur(1px)' : 'blur(0px)',
                 }}
-                transition={{ delay: i * 0.8, duration: 0.7, type: 'spring', stiffness: 100 }}
+                transition={{
+                  delay: i * 0.2,
+                  duration: isDimmed ? 0.25 : 0.4,
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 22,
+                }}
                 onAnimationComplete={() => {
                   if (i >= visibleCount) setVisibleCount(i + 1)
                 }}
@@ -141,8 +150,8 @@ export default function CharacterScene({
                     : { opacity: 1, y: 0 }
                   }
                   transition={isSpeaking
-                    ? { boxShadow: { duration: 1.2, repeat: Infinity }, delay: i * 0.8 + 0.4, duration: 0.5 }
-                    : { delay: i * 0.8 + 0.4, duration: 0.5 }
+                    ? { boxShadow: { duration: 1.2, repeat: Infinity }, delay: i * 0.2 + 0.2, duration: 0.3 }
+                    : { delay: i * 0.2 + 0.2, duration: 0.3 }
                   }
                   className="relative mb-2 px-4 py-3 rounded-2xl text-sm leading-relaxed max-w-[220px]"
                   style={{
@@ -163,10 +172,14 @@ export default function CharacterScene({
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        onPlayLine(charType, char.line)
+                        if (isSpeaking) {
+                          onStop()
+                        } else {
+                          onPlayLine(charType, char.line)
+                        }
                       }}
                       className="ml-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
-                      title={`Play ${char.name}'s voice`}
+                      title={isSpeaking ? `Stop ${char.name}` : `Play ${char.name}'s voice`}
                     >
                       {isSpeaking ? (
                         <motion.span
@@ -251,7 +264,7 @@ export default function CharacterScene({
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: characters.length * 0.8 + 0.5 }}
+        transition={{ delay: characters.length * 0.2 + 0.3 }}
         className="text-center text-xs pb-4"
         style={{ color: 'var(--text-dim)' }}
       >
