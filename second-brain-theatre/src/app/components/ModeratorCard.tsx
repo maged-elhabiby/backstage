@@ -59,7 +59,7 @@ export default function ModeratorCard({
       {/* Header */}
       <div className="flex items-center gap-4">
         <Image
-          src="/characters/moderator.gif"
+          src="/characters/moderator/moderator.gif"
           alt="Moderator"
           width={80}
           height={80}
