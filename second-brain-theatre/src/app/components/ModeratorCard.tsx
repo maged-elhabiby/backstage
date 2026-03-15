@@ -36,6 +36,9 @@ export default function ModeratorCard({
   dimmed: boolean
 }) {
   const [copied, setCopied] = useState(false)
+  const [timerActive, setTimerActive] = useState(false)
+  const [timerSeconds, setTimerSeconds] = useState(0)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const emoji = SCENE_LABEL_EMOJIS[sceneLabel] ?? '🌀'
   const hasAutoPlayed = useRef(false)
 
@@ -47,11 +50,37 @@ export default function ModeratorCard({
     }
   }, [onPlayLine, moderator.best_move])
 
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [])
+
   const handleAction = () => {
     if (moderator.action_type === 'draft' || moderator.action_type === 'copy') {
       navigator.clipboard.writeText(moderator.action_draft)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+    } else if (moderator.action_type === 'timer') {
+      if (timerActive) {
+        if (timerRef.current) clearInterval(timerRef.current)
+        timerRef.current = null
+        setTimerActive(false)
+        setTimerSeconds(0)
+      } else {
+        const mins = parseInt(moderator.action_draft) || 25
+        setTimerSeconds(mins * 60)
+        setTimerActive(true)
+        timerRef.current = setInterval(() => {
+          setTimerSeconds(prev => {
+            if (prev <= 1) {
+              if (timerRef.current) clearInterval(timerRef.current)
+              timerRef.current = null
+              setTimerActive(false)
+              return 0
+            }
+            return prev - 1
+          })
+        }, 1000)
+      }
     }
   }
 
@@ -154,7 +183,15 @@ export default function ModeratorCard({
           border: moderator.action_type === 'draft' ? 'none' : '2px solid var(--accent-warm)',
         }}
       >
-        {copied ? '✓ Copied' : moderator.action_type === 'timer' ? `Start ${moderator.action_draft}-min focus` : moderator.action_type === 'draft' ? 'Copy draft to clipboard' : 'Copy action'}
+        {copied
+          ? '✓ Copied'
+          : moderator.action_type === 'timer'
+            ? timerActive
+              ? `⏱ ${Math.floor(timerSeconds / 60)}:${(timerSeconds % 60).toString().padStart(2, '0')} — tap to stop`
+              : `Start ${moderator.action_draft}-min focus`
+            : moderator.action_type === 'draft'
+              ? 'Copy draft to clipboard'
+              : 'Copy action'}
       </button>
 
       <p className="text-xs italic text-center" style={{ color: 'var(--text-dim)' }}>

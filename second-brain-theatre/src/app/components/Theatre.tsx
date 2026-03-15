@@ -289,6 +289,7 @@ export default function Theatre({ userEmail }: { userEmail: string }) {
                   key={state.chatCharacter.type}
                   character={state.chatCharacter}
                   sceneId={state.sceneId}
+                  brainDump={state.brainDump}
                   onPlayLine={playLine}
                   onClose={() => dispatch({ type: 'CLOSE_CHAT' })}
                 />
@@ -347,6 +348,7 @@ export default function Theatre({ userEmail }: { userEmail: string }) {
                   key={state.chatCharacter.type}
                   character={state.chatCharacter}
                   sceneId={state.sceneId}
+                  brainDump={state.brainDump}
                   onPlayLine={playLine}
                   onClose={() => dispatch({ type: 'CLOSE_CHAT' })}
                 />
@@ -379,9 +381,6 @@ export default function Theatre({ userEmail }: { userEmail: string }) {
         🎭 Your Cast
       </button>
 
-      <div className="fixed top-4 right-4 text-xs" style={{ color: 'var(--text-dim)' }}>
-        {userEmail}
-      </div>
     </div>
   )
 }

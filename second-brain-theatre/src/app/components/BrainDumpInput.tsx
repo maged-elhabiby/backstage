@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useRecorder } from '@/app/hooks/useRecorder'
 
@@ -27,6 +27,7 @@ export default function BrainDumpInput({
   }, [onChange])
 
   const { recording, transcribing, error: micError, startRecording, stopRecording } = useRecorder({ onAutoStop: handleAutoStop })
+  const [overwhelm, setOverwhelm] = useState(5)
 
   const handleMicToggle = async () => {
     if (recording) {
@@ -138,8 +139,39 @@ export default function BrainDumpInput({
 
         </div>
 
+        {value.trim().length >= 10 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+            className="space-y-3"
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                How overwhelmed do you feel?
+              </p>
+              <span className="text-2xl font-bold tabular-nums" style={{ fontFamily: 'var(--font-playfair)', color: 'var(--primary)' }}>
+                {overwhelm}
+              </span>
+            </div>
+            <input
+              type="range"
+              min={1}
+              max={10}
+              value={overwhelm}
+              onChange={(e) => setOverwhelm(Number(e.target.value))}
+              className="w-full accent-purple-500 cursor-pointer"
+              style={{ accentColor: 'var(--primary)' }}
+            />
+            <div className="flex justify-between text-xs" style={{ color: 'var(--text-dim)' }}>
+              <span>a little noisy</span>
+              <span>completely drowning</span>
+            </div>
+          </motion.div>
+        )}
+
         <motion.button
-          onClick={() => value.trim().length >= 10 && onSubmit(value, 7)}
+          onClick={() => value.trim().length >= 10 && onSubmit(value, overwhelm)}
           disabled={value.trim().length < 10}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}

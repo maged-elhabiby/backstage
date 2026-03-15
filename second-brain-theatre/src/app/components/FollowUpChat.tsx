@@ -34,11 +34,13 @@ const HARDCODED_REPLIES: Record<string, string> = {
 export default function FollowUpChat({
   character,
   sceneId,
+  brainDump,
   onPlayLine,
   onClose,
 }: {
   character: { type: string; name: string; line: string }
   sceneId: string | null
+  brainDump: string
   onPlayLine: (characterType: string, line: string) => Promise<void>
   onClose: () => void
 }) {
@@ -69,6 +71,7 @@ export default function FollowUpChat({
           sceneId,
           characterType: character.type,
           originalLine: character.line,
+          brainDump,
           messages: newMessages,
         }),
       })
