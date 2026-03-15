@@ -157,13 +157,17 @@ export default function Theatre({ userEmail }: { userEmail: string }) {
             .catch(() => dispatch({ type: 'MODERATOR_PREFETCHED', moderator: MOCK_MODERATOR }))
         } catch {
           dispatch({ type: 'CHARACTERS_RECEIVED', characters: MOCK_CHARACTERS })
+          dispatch({ type: 'MODERATOR_PREFETCHED', moderator: MOCK_MODERATOR })
         }
       }, 2500)
     } catch {
       dispatch({ type: 'CAST_RECEIVED', casting: MOCK_CASTING })
       setTimeout(() => {
-        dispatch({ type: 'CHARACTERS_RECEIVED', characters: MOCK_CHARACTERS })
-        dispatch({ type: 'MODERATOR_PREFETCHED', moderator: MOCK_MODERATOR })
+        dispatch({ type: 'CHARACTERS_READY' })
+        setTimeout(() => {
+          dispatch({ type: 'CHARACTERS_RECEIVED', characters: MOCK_CHARACTERS })
+          dispatch({ type: 'MODERATOR_PREFETCHED', moderator: MOCK_MODERATOR })
+        }, 800)
       }, 2500)
     }
   }, [])
