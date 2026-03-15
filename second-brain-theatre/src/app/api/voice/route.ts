@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { createHash } from "crypto";
 import { getVoiceConfig } from "@/lib/elevenlabs/voices";
+import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -8,6 +9,15 @@ export const maxDuration = 30;
 const audioCache = new Map<string, Buffer>();
 
 export async function GET(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const character = searchParams.get("character");

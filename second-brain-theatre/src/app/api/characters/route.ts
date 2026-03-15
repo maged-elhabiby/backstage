@@ -2,11 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { runCharacter } from "@/lib/langchain/chain";
 import { CHARACTER_PROMPTS } from "@/lib/prompts/characters";
 import { FALLBACK_LINES } from "@/lib/types";
+import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
     const { brainDump, characters } = await request.json();
 

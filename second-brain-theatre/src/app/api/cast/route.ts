@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runCasting } from "@/lib/langchain/chain";
+import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
     const { brainDump } = await request.json();
 
