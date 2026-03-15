@@ -3,6 +3,7 @@
 import { useReducer, useCallback, useRef, useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { CastingResult, CharacterResponse, ModeratorResponse } from '@/lib/types'
+import { useVoice } from '@/app/hooks/useVoice'
 import BrainDumpInput from './BrainDumpInput'
 import FreezeFrame from './FreezeFrame'
 import CharacterScene from './CharacterScene'
@@ -120,6 +121,7 @@ const MOCK_MODERATOR: ModeratorResponse = {
 export default function Theatre({ userEmail }: { userEmail: string }) {
   const [state, dispatch] = useReducer(reducer, initial)
   const [castOpen, setCastOpen] = useState(false)
+  const { playLine, playSequence, playingCharacter, stop: stopVoice } = useVoice()
 
   const handleSubmit = useCallback(async (brainDump: string, overwhelmBefore: number) => {
     dispatch({ type: 'SUBMIT', brainDump, overwhelmBefore })
@@ -226,12 +228,15 @@ export default function Theatre({ userEmail }: { userEmail: string }) {
     }
   }, [state.brainDump, state.casting, state.characters, state.moderator, state.overwhelmBefore])
 
-  // Auto-transition to resolution if moderator arrives while we're in loading_moderator
   useEffect(() => {
     if (state.phase === 'loading_moderator' && state.moderator) {
       dispatch({ type: 'CALL_MODERATOR' })
     }
   }, [state.phase, state.moderator])
+
+  useEffect(() => {
+    if (state.phase === 'input') stopVoice()
+  }, [state.phase, stopVoice])
 
   const isStagePhase = state.phase === 'loading_characters' || state.phase === 'stage' || state.phase === 'loading_moderator'
   const isResolutionPhase = state.phase === 'resolution' || state.phase === 'after_rating'
@@ -266,6 +271,9 @@ export default function Theatre({ userEmail }: { userEmail: string }) {
               castingTypes={state.casting?.characters.map(c => c.type) ?? []}
               loading={state.phase === 'loading_characters'}
               activeCharacter={state.chatCharacter?.type ?? null}
+              playingCharacter={playingCharacter}
+              onPlayLine={playLine}
+              onPlaySequence={playSequence}
               onCharacterTap={(c) => {
                 if (state.chatCharacter?.type === c.type) {
                   dispatch({ type: 'CLOSE_CHAT' })
@@ -275,13 +283,13 @@ export default function Theatre({ userEmail }: { userEmail: string }) {
               }}
             />
 
-            {/* Inline chat below the stage */}
             <AnimatePresence>
               {state.chatCharacter && (
                 <FollowUpChat
                   key={state.chatCharacter.type}
                   character={state.chatCharacter}
                   sceneId={state.sceneId}
+                  onPlayLine={playLine}
                   onClose={() => dispatch({ type: 'CLOSE_CHAT' })}
                 />
               )}
@@ -326,19 +334,20 @@ export default function Theatre({ userEmail }: { userEmail: string }) {
               moderator={state.moderator}
               sceneLabel={state.casting?.scene_label ?? ''}
               characters={state.characters}
+              onPlayLine={playLine}
               onCharacterTap={(c) => dispatch({ type: 'OPEN_CHAT', character: c })}
               onReset={() => dispatch({ type: 'RESET' })}
               onShowRating={() => dispatch({ type: 'SHOW_RATING' })}
               dimmed={state.phase === 'after_rating'}
             />
 
-            {/* Inline chat in resolution too */}
             <AnimatePresence>
               {state.chatCharacter && (
                 <FollowUpChat
                   key={state.chatCharacter.type}
                   character={state.chatCharacter}
                   sceneId={state.sceneId}
+                  onPlayLine={playLine}
                   onClose={() => dispatch({ type: 'CLOSE_CHAT' })}
                 />
               )}

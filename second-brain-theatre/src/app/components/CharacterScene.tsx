@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CHARACTER_IMAGES } from '@/lib/types'
 import type { CharacterResponse } from '@/lib/types'
@@ -38,15 +38,34 @@ export default function CharacterScene({
   castingTypes,
   loading,
   activeCharacter,
+  playingCharacter,
+  onPlayLine,
+  onPlaySequence,
   onCharacterTap,
 }: {
   characters: CharacterResponse[]
   castingTypes: string[]
   loading: boolean
   activeCharacter: string | null
+  playingCharacter: string | null
+  onPlayLine: (characterType: string, line: string) => Promise<void>
+  onPlaySequence: (items: { type: string; line: string }[]) => Promise<void>
   onCharacterTap: (c: { type: string; name: string; line: string }) => void
 }) {
   const [visibleCount, setVisibleCount] = useState(0)
+  const hasAutoPlayed = useRef(false)
+
+  useEffect(() => {
+    if (characters.length > 0 && !hasAutoPlayed.current) {
+      hasAutoPlayed.current = true
+      const items = characters.map((char, i) => ({
+        type: castingTypes[i] ?? typeFromName(char.name),
+        line: char.line,
+      }))
+      const timer = setTimeout(() => onPlaySequence(items), characters.length * 800 + 600)
+      return () => clearTimeout(timer)
+    }
+  }, [characters, castingTypes, onPlaySequence])
 
   if (loading) {
     return (
@@ -82,7 +101,8 @@ export default function CharacterScene({
             const imgSrc = CHARACTER_IMAGES[charType]
             const color = CHAR_COLORS[charType] ?? 'var(--primary)'
             const isActive = activeCharacter === charType
-            const isDimmed = activeCharacter !== null && !isActive
+            const isSpeaking = playingCharacter === charType
+            const isDimmed = (activeCharacter !== null && !isActive) || (playingCharacter !== null && !isSpeaking)
 
             return (
               <motion.div
@@ -104,23 +124,57 @@ export default function CharacterScene({
                 {/* Speech bubble */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.8 + 0.4, duration: 0.5 }}
+                  animate={isSpeaking
+                    ? { opacity: 1, y: 0, boxShadow: [`0 0 16px ${color}33`, `0 0 28px ${color}66`, `0 0 16px ${color}33`] }
+                    : { opacity: 1, y: 0 }
+                  }
+                  transition={isSpeaking
+                    ? { boxShadow: { duration: 1.2, repeat: Infinity }, delay: i * 0.8 + 0.4, duration: 0.5 }
+                    : { delay: i * 0.8 + 0.4, duration: 0.5 }
+                  }
                   className="relative mb-2 px-4 py-3 rounded-2xl text-sm leading-relaxed max-w-[220px]"
                   style={{
                     background: 'rgba(26, 23, 38, 0.92)',
-                    border: `2px solid ${color}`,
+                    border: `2px solid ${isSpeaking ? color : color}`,
                     color: 'var(--text)',
-                    boxShadow: `0 0 16px ${color}33`,
+                    boxShadow: isSpeaking ? `0 0 28px ${color}66` : `0 0 16px ${color}33`,
                   }}
                 >
                   <p>&ldquo;{char.line}&rdquo;</p>
-                  <span
-                    className="block mt-1.5 text-[10px] uppercase tracking-wider font-medium"
-                    style={{ color }}
-                  >
-                    protecting {char.protecting}
-                  </span>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <span
+                      className="text-[10px] uppercase tracking-wider font-medium"
+                      style={{ color }}
+                    >
+                      protecting {char.protecting}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onPlayLine(charType, char.line)
+                      }}
+                      className="ml-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
+                      title={`Play ${char.name}'s voice`}
+                    >
+                      {isSpeaking ? (
+                        <motion.span
+                          animate={{ opacity: [0.4, 1, 0.4] }}
+                          transition={{ duration: 0.8, repeat: Infinity }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill={color} stroke="none">
+                            <rect x="4" y="4" width="6" height="16" rx="1" />
+                            <rect x="14" y="4" width="6" height="16" rx="1" />
+                          </svg>
+                        </motion.span>
+                      ) : (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
 
                   {/* Bubble tail */}
                   <div
@@ -135,8 +189,8 @@ export default function CharacterScene({
 
                 {/* Sprite */}
                 <motion.div
-                  animate={isActive ? { y: [0, -6, 0] } : {}}
-                  transition={isActive ? { duration: 0.6, repeat: Infinity, repeatType: 'loop' } : {}}
+                  animate={(isActive || isSpeaking) ? { y: [0, -6, 0] } : {}}
+                  transition={(isActive || isSpeaking) ? { duration: 0.6, repeat: Infinity, repeatType: 'loop' } : {}}
                   className="relative"
                 >
                   {imgSrc ? (

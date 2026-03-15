@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 const followupModel = new ChatAnthropic({
-  model: "claude-sonnet-4-6-20250514",
+  model: "claude-haiku-4-5-20251001",
   temperature: 0.8,
   maxTokens: 300,
 });

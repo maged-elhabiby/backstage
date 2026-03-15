@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { CHARACTER_IMAGES, SCENE_LABEL_EMOJIS } from '@/lib/types'
 import type { CharacterResponse, ModeratorResponse } from '@/lib/types'
@@ -20,6 +20,7 @@ export default function ModeratorCard({
   moderator,
   sceneLabel,
   characters,
+  onPlayLine,
   onCharacterTap,
   onReset,
   onShowRating,
@@ -28,6 +29,7 @@ export default function ModeratorCard({
   moderator: ModeratorResponse
   sceneLabel: string
   characters: CharacterResponse[]
+  onPlayLine: (characterType: string, line: string) => Promise<void>
   onCharacterTap: (c: { type: string; name: string; line: string }) => void
   onReset: () => void
   onShowRating: () => void
@@ -35,6 +37,15 @@ export default function ModeratorCard({
 }) {
   const [copied, setCopied] = useState(false)
   const emoji = SCENE_LABEL_EMOJIS[sceneLabel] ?? '🌀'
+  const hasAutoPlayed = useRef(false)
+
+  useEffect(() => {
+    if (!hasAutoPlayed.current) {
+      hasAutoPlayed.current = true
+      const timer = setTimeout(() => onPlayLine('moderator', moderator.best_move), 800)
+      return () => clearTimeout(timer)
+    }
+  }, [onPlayLine, moderator.best_move])
 
   const handleAction = () => {
     if (moderator.action_type === 'draft' || moderator.action_type === 'copy') {
@@ -88,9 +99,22 @@ export default function ModeratorCard({
         </div>
 
         <div className="rounded-xl p-4" style={{ background: 'rgba(192,132,252,0.06)', border: '1px solid rgba(192,132,252,0.15)' }}>
-          <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--primary)' }}>
-            Best stabilizing move
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--primary)' }}>
+              Best stabilizing move
+            </p>
+            <button
+              onClick={() => onPlayLine('moderator', moderator.best_move)}
+              className="opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
+              title="Play moderator voice"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-warm)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              </svg>
+            </button>
+          </div>
           <p className="text-base font-medium leading-relaxed" style={{ color: 'var(--text)' }}>
             {moderator.best_move}
           </p>
